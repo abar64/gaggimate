@@ -313,6 +313,18 @@ void Controller::loop() {
                 brewProcess->updateFlow(currentPumpFlow);
             }
             currentProcess->progress();
+            // When a brew process transitions into its first PHASE_TYPE_BREW (extraction) phase,
+            // tare the flow estimator on the controller so ev tracks from zero at extraction start
+            // rather than carrying over volume accumulated during pre-infuse / bloom.
+            if (currentProcess->getType() == MODE_BREW) {
+                auto *brewProcess = static_cast<BrewProcess *>(currentProcess);
+                if (brewProcess->phaseIndex != lastBrewPhaseIndex) {
+                    lastBrewPhaseIndex = brewProcess->phaseIndex;
+                    if (brewProcess->currentPhase.phase == PhaseType::PHASE_TYPE_BREW) {
+                        clientController.tare();
+                    }
+                }
+            }
             if (!isActive()) {
                 deactivate();
             }
@@ -565,6 +577,7 @@ void Controller::activate() {
     if (isActive())
         return;
     clear();
+    lastBrewPhaseIndex = UINT_MAX;
     clientController.tare();
     if (isVolumetricAvailable()) {
 #ifdef NIGHTLY_BUILD
