@@ -55,10 +55,10 @@ class GrindProcess : public Process {
         double newDelay = grindDelay + volumetricRateCalculator.getOvershootAdjustMillis(grindVolume, currentVolume);
         ESP_LOGI("GrindProcess", "Setting new delay time - Old: %2f, Expected Volume: %f, Actual Volume: %2f, New Delay: %f",
                  grindDelay, grindVolume, currentVolume, newDelay);
-        if (newDelay <= 0.0 || newDelay >= PREDICTIVE_TIME) {
+        if (newDelay >= PREDICTIVE_TIME) {
             return -1;
         }
-        return newDelay;
+        return std::max(newDelay, 200.0);
     }
 
     bool isActive() override {
