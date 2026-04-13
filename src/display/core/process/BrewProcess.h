@@ -19,7 +19,8 @@ class BrewProcess : public Process {
     unsigned long currentPhaseStarted = 0;
     unsigned long previousPhaseFinished = 0;
     unsigned long finished = 0;
-    double currentVolume = 0; // most recent volume pushed
+    double currentVolume = 0;     // most recent volume pushed (absolute, from BT scale)
+    double phaseStartVolume = 0.0; // currentVolume at the start of the current phase
     float currentFlow = 0.0f;
     float currentPressure = 0.0f;
     float waterPumped = 0.0f;
@@ -54,12 +55,12 @@ class BrewProcess : public Process {
         if (millis() - currentPhaseStarted > BREW_SAFETY_DURATION_MS) {
             return true;
         }
-        double volume = currentVolume;
+        double volume = currentVolume - phaseStartVolume;
         if (volume > 0.0) {
             double currentRate = volumetricRateCalculator.getRate();
             double predictedAddedVolume = currentRate * brewDelay;
             predictedAddedVolume = std::clamp(predictedAddedVolume, 0.0, 8.0);
-            volume = currentVolume + predictedAddedVolume;
+            volume = (currentVolume - phaseStartVolume) + predictedAddedVolume;
         }
         float timeInPhase = static_cast<float>(millis() - currentPhaseStarted) / 1000.0f;
         return currentPhase.isFinished(target == ProcessTarget::VOLUMETRIC, volume, timeInPhase, currentFlow, currentPressure,
@@ -80,11 +81,11 @@ class BrewProcess : public Process {
     }
 
     double getNewDelayTime() {
-        double newDelay = brewDelay + volumetricRateCalculator.getOvershootAdjustMillis(getBrewVolume(), currentVolume);
-        if (newDelay <= 0.0 || newDelay >= PREDICTIVE_TIME) {
+        double newDelay = brewDelay + volumetricRateCalculator.getOvershootAdjustMillis(getBrewVolume(), currentVolume - phaseStartVolume);
+        if (newDelay >= PREDICTIVE_TIME) {
             return -1;
         }
-        return newDelay;
+        return std::max(newDelay, 200.0);
     }
 
     bool isRelayActive() override {
@@ -139,6 +140,7 @@ class BrewProcess : public Process {
             previousPhaseFinished = millis();
             if (phaseIndex + 1 < profile.phases.size()) {
                 waterPumped = 0.0f;
+                phaseStartVolume = currentVolume;
                 phaseIndex++;
                 Phase nextPhase = profile.phases.at(phaseIndex);
                 phaseStartPressure = nextPhase.transition.adaptive ? currentPressure : getPumpPressure();
