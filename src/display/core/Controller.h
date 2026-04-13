@@ -168,6 +168,9 @@ class Controller {
     bool sdcard = false;
     int error = 0;
 
+    // Phase transition tracking for flow estimator tare
+    unsigned int lastBrewPhaseIndex = UINT_MAX;
+
     // Bluetooth scale connection monitoring
     VolumetricMeasurementSource currentVolumetricSource = VolumetricMeasurementSource::INACTIVE;
     unsigned long lastBluetoothMeasurement = 0;
