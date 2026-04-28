@@ -50,6 +50,19 @@ class DefaultUI {
     void markProfileDirty() { profileDirty = true; }
     void markProfileClean() { profileDirty = false; }
 
+    void setSettleStatus(float weight) {
+        if (ui_BrewScreen_mainLabel3 == nullptr)
+            return;
+        lv_label_set_text_fmt(ui_BrewScreen_mainLabel3, "Waiting for scale... %.1fg", weight);
+        lv_refr_now(lv_disp_get_default());
+    }
+    void clearSettleStatus() {
+        if (ui_BrewScreen_mainLabel3 == nullptr)
+            return;
+        lv_label_set_text(ui_BrewScreen_mainLabel3, "Brew");
+        lv_refr_now(lv_disp_get_default());
+    }
+
     void applyTheme();
 
     bool isTaskHealthy() const {
