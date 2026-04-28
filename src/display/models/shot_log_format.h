@@ -69,8 +69,13 @@ struct ShotLogHeader {
     PhaseTransition phaseTransitions[12]; // 12 × 29 = 348 bytes
     uint8_t phaseTransitionCount;         // 1 byte
 
+    // Scale settle diagnostics written at shot start
+    uint32_t scaleSettleMs;       // ms waited for scale to reach ±5g; 0 if no BLE scale
+    float scaleOffsetAtStart;     // scale reading when shot was cleared to start (g)
+    uint8_t scaleSettleTimedOut;  // 1 if the 10s timeout was hit and volumetric stop was disabled
+
     // Future expansion - pad to 512 bytes total
-    uint8_t reserved_v5[53]; // Manual padding to reach 512 bytes
+    uint8_t reserved_v5[44]; // 53 - 9 bytes used above
 };
 #pragma pack(pop)
 
