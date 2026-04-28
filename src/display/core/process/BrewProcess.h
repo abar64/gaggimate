@@ -19,7 +19,8 @@ class BrewProcess : public Process {
     unsigned long currentPhaseStarted = 0;
     unsigned long previousPhaseFinished = 0;
     unsigned long finished = 0;
-    double currentVolume = 0; // most recent volume pushed
+    double currentVolume = 0;              // most recent volume pushed (absolute, from BT scale)
+    double brewDelayPhaseStartVolume = 0.0; // currentVolume at each phase transition — used only for brewDelay overshoot
     float currentFlow = 0.0f;
     float currentPressure = 0.0f;
     float waterPumped = 0.0f;
@@ -54,12 +55,16 @@ class BrewProcess : public Process {
         if (millis() - currentPhaseStarted > BREW_SAFETY_DURATION_MS) {
             return true;
         }
-        double volume = currentVolume;
+        // For VOLUMETRIC target, use absolute scale weight (from shot-start tare) so the 36g
+        // target means 36g total cup weight regardless of how many phases preceded extraction.
+        // For TIME target, measure relative to phase start so each phase's volume check is independent.
+        double baseVolume = (target == ProcessTarget::VOLUMETRIC) ? 0.0 : brewDelayPhaseStartVolume;
+        double volume = currentVolume - baseVolume;
         if (volume > 0.0) {
             double currentRate = volumetricRateCalculator.getRate();
             double predictedAddedVolume = currentRate * brewDelay;
             predictedAddedVolume = std::clamp(predictedAddedVolume, 0.0, 8.0);
-            volume = currentVolume + predictedAddedVolume;
+            volume = (currentVolume - baseVolume) + predictedAddedVolume;
         }
         float timeInPhase = static_cast<float>(millis() - currentPhaseStarted) / 1000.0f;
         return currentPhase.isFinished(target == ProcessTarget::VOLUMETRIC, volume, timeInPhase, currentFlow, currentPressure,
@@ -80,8 +85,8 @@ class BrewProcess : public Process {
     }
 
     double getNewDelayTime() {
-        double newDelay = brewDelay + volumetricRateCalculator.getOvershootAdjustMillis(getBrewVolume(), currentVolume);
-        if (newDelay <= 0.0 || newDelay >= PREDICTIVE_TIME) {
+        double newDelay = brewDelay + volumetricRateCalculator.getOvershootAdjustMillis(getBrewVolume(), currentVolume - brewDelayPhaseStartVolume);
+        if (newDelay >= PREDICTIVE_TIME) {
             return -1;
         }
         return newDelay;
@@ -139,6 +144,7 @@ class BrewProcess : public Process {
             previousPhaseFinished = millis();
             if (phaseIndex + 1 < profile.phases.size()) {
                 waterPumped = 0.0f;
+                brewDelayPhaseStartVolume = currentVolume;
                 phaseIndex++;
                 Phase nextPhase = profile.phases.at(phaseIndex);
                 phaseStartPressure = nextPhase.transition.adaptive ? currentPressure : getPumpPressure();
