@@ -116,6 +116,9 @@ void ShotHistoryPlugin::record() {
                 strncpy(header.profileName, profile.label.c_str(), sizeof(header.profileName) - 1);
                 header.profileName[sizeof(header.profileName) - 1] = '\0';
                 header.phaseTransitionCount = 0; // Initialize phase transition count
+                header.scaleSettleMs = shotScaleSettleMs;
+                header.scaleOffsetAtStart = shotScaleOffsetAtStart;
+                header.scaleSettleTimedOut = shotScaleSettleTimedOut ? 1 : 0;
                 // Write header placeholder
                 currentFile.write(reinterpret_cast<const uint8_t *>(&header), sizeof(header));
             }
@@ -254,12 +257,12 @@ void ShotHistoryPlugin::record() {
 
 void ShotHistoryPlugin::startRecording() {
     Process *process = controller->getProcess();
+    shotStartedVolumetric = false;
     if (process != nullptr && process->getType() == MODE_BREW) {
         BrewProcess *brewProcess = static_cast<BrewProcess *>(process);
         if (brewProcess->isUtility()) {
             return;
         }
-        // Capture initial volumetric mode state (brew by weight vs brew by time)
         shotStartedVolumetric = brewProcess->target == ProcessTarget::VOLUMETRIC;
     }
     currentId = padId(String(controller->getSettings().getHistoryIndex()));
@@ -279,6 +282,11 @@ void ShotHistoryPlugin::startRecording() {
 
     // Reset phase tracking for new shot
     lastRecordedPhase = 0xFF; // Invalid value to detect first phase
+
+    // Capture scale settle diagnostics from the just-completed activate()
+    shotScaleSettleMs = controller->getLastScaleSettleMs();
+    shotScaleOffsetAtStart = controller->getLastScaleOffsetAtStart();
+    shotScaleSettleTimedOut = controller->wasLastScaleSettleTimedOut();
 }
 
 unsigned long ShotHistoryPlugin::getTime() {
@@ -470,6 +478,9 @@ void ShotHistoryPlugin::handleRequest(JsonDocument &request, JsonDocument &respo
                         if (headerIncomplete) {
                             o["incomplete"] = true; // flag partial shot
                         }
+                        o["scaleSettleMs"] = hdr.scaleSettleMs;
+                        o["scaleOffsetAtStart"] = hdr.scaleOffsetAtStart;
+                        o["scaleSettleTimedOut"] = hdr.scaleSettleTimedOut != 0;
                     }
                 }
                 file = root.openNextFile();

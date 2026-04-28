@@ -84,6 +84,11 @@ class ShotHistoryPlugin : public Plugin {
     // Phase transition tracking (v5+)
     uint8_t lastRecordedPhase = 0xFF; // Invalid initial value to detect first phase
 
+    // Scale settle diagnostics captured at shot start
+    uint32_t shotScaleSettleMs = 0;
+    float shotScaleOffsetAtStart = 0.0f;
+    bool shotScaleSettleTimedOut = false;
+
     // Async rebuild state
     bool rebuildInProgress = false;
 
