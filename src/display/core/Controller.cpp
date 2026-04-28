@@ -577,11 +577,46 @@ void Controller::activate() {
             pluginManager->trigger("controller:brew:prestart");
         }
     }
-    delay(200);
+    lastScaleSettleMs = 0;
+    lastScaleOffsetAtStart = 0.0f;
+    lastScaleSettleTimedOut = false;
+
+    if (BLEScales.isConnected() && mode == MODE_BREW) {
+        const unsigned long settleStart = millis();
+        bool settled = false;
+        while (millis() - settleStart < SCALE_SETTLE_TIMEOUT_MS) {
+            float w = BLEScales.getLastWeight();
+#ifndef GAGGIMATE_HEADLESS
+            if (ui != nullptr) {
+                ui->setSettleStatus(w);
+            }
+#endif
+            if (w > -SCALE_SETTLE_THRESHOLD_G && w < SCALE_SETTLE_THRESHOLD_G) {
+                settled = true;
+                break;
+            }
+            delay(50);
+        }
+        lastScaleSettleMs = static_cast<uint32_t>(millis() - settleStart);
+        lastScaleOffsetAtStart = BLEScales.getLastWeight();
+        lastScaleSettleTimedOut = !settled;
+        if (lastScaleSettleTimedOut) {
+            ESP_LOGW(LOG_TAG, "Scale did not settle within %dms (last reading: %.1fg) - volumetric stop disabled",
+                     SCALE_SETTLE_TIMEOUT_MS, lastScaleOffsetAtStart);
+        }
+#ifndef GAGGIMATE_HEADLESS
+        if (ui != nullptr) {
+            ui->clearSettleStatus();
+        }
+#endif
+    } else {
+        delay(200);
+    }
     switch (mode) {
     case MODE_BREW:
         startProcess(new BrewProcess(profileManager->getSelectedProfile(),
-                                     profileManager->getSelectedProfile().isVolumetric() && isVolumetricAvailable()
+                                     profileManager->getSelectedProfile().isVolumetric() && isVolumetricAvailable() &&
+                                             !lastScaleSettleTimedOut
                                          ? ProcessTarget::VOLUMETRIC
                                          : ProcessTarget::TIME,
                                      settings.getBrewDelay()));

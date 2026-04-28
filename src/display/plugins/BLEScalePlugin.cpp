@@ -317,6 +317,8 @@ void BLEScalePlugin::onMeasurement(float value) const {
         return;
     }
 
+    lastWeight = value;
+
     // Safe to call controller method
     controller->onVolumetricMeasurement(value, VolumetricMeasurementSource::BLUETOOTH);
 }

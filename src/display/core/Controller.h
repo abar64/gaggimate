@@ -91,6 +91,10 @@ class Controller {
     void setVolumetricOverride(bool override) { volumetricOverride = override; }
     bool isBluetoothScaleHealthy() const;
     void onFlush();
+
+    uint32_t getLastScaleSettleMs() const { return lastScaleSettleMs; }
+    float getLastScaleOffsetAtStart() const { return lastScaleOffsetAtStart; }
+    bool wasLastScaleSettleTimedOut() const { return lastScaleSettleTimedOut; }
     int getWaterLevel() const {
         float reversedLevel = static_cast<float>(settings.getEmptyTankDistance()) -
                               static_cast<float>(std::min(settings.getEmptyTankDistance(), tofDistance));
@@ -170,6 +174,14 @@ class Controller {
     bool steamReady = false;
     bool sdcard = false;
     int error = 0;
+
+    // Phase transition tracking for flow estimator tare
+    unsigned int lastBrewPhaseIndex = UINT_MAX;
+
+    // Scale settle diagnostics from most recent activate()
+    uint32_t lastScaleSettleMs = 0;
+    float lastScaleOffsetAtStart = 0.0f;
+    bool lastScaleSettleTimedOut = false;
 
     // Bluetooth scale connection monitoring
     VolumetricMeasurementSource currentVolumetricSource = VolumetricMeasurementSource::INACTIVE;
