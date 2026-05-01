@@ -127,6 +127,8 @@ class DefaultUI {
     double bluetoothWeight = 0.0;
     BrewScreenState brewScreenState = BrewScreenState::Brew;
 
+    int tempWakeupDelayMinutes = 0;
+    unsigned long tempWakeupConfirmedMs = 0;
     int profileDirty = 0;
     int currentProfileIdx;
     int profileLoaded = 0;

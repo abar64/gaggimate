@@ -74,6 +74,10 @@ class Controller {
     void lowerBrewTarget();
     void raiseGrindTarget();
     void lowerGrindTarget();
+    void raiseTempWakeupDelay();
+    void lowerTempWakeupDelay();
+    void activateTempWakeup();
+    int getTempWakeupDelayMinutes() const { return tempWakeupDelayMinutes; }
     void activate();
     void deactivate();
     void clear();
@@ -170,6 +174,8 @@ class Controller {
     bool steamReady = false;
     bool sdcard = false;
     int error = 0;
+
+    int tempWakeupDelayMinutes = 0;
 
     // Bluetooth scale connection monitoring
     VolumetricMeasurementSource currentVolumetricSource = VolumetricMeasurementSource::INACTIVE;

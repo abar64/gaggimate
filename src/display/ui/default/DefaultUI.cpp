@@ -120,6 +120,14 @@ void DefaultUI::init() {
         grindVolume = event.getFloat("value");
         rerender = true;
     });
+    pluginManager->on("standby:wakeupDelay:change", [=](Event const &event) {
+        tempWakeupDelayMinutes = event.getInt("value");
+        rerender = true;
+    });
+    pluginManager->on("standby:wakeup:confirmed", [=](Event const &) {
+        tempWakeupConfirmedMs = millis();
+        rerender = true;
+    });
     pluginManager->on("controller:process:end", triggerRender);
     pluginManager->on("controller:process:start", triggerRender);
     pluginManager->on("controller:mode:change", [this](Event const &event) {
@@ -519,6 +527,8 @@ void DefaultUI::setupReactive() {
                               _ui_flag_modify(ui_StandbyScreen_mainLabel, LV_OBJ_FLAG_HIDDEN, deactivated);
                               _ui_flag_modify(ui_StandbyScreen_touchIcon, LV_OBJ_FLAG_HIDDEN, !deactivated);
                               _ui_flag_modify(ui_StandbyScreen_statusContainer, LV_OBJ_FLAG_HIDDEN, !deactivated);
+                              _ui_flag_modify(ui_StandbyScreen_downDotLabel, LV_OBJ_FLAG_HIDDEN, !deactivated);
+                              _ui_flag_modify(ui_StandbyScreen_upDotLabel, LV_OBJ_FLAG_HIDDEN, !deactivated);
                           },
                           &updateAvailable, &error, &autotuning, &waitingForController, &initialized);
     effect_mgr.use_effect([=] { return currentScreen == ui_BrewScreen; },
@@ -738,6 +748,25 @@ void DefaultUI::updateStandbyScreen() {
                                                      : lv_obj_add_flag(ui_StandbyScreen_bluetoothIcon, LV_OBJ_FLAG_HIDDEN);
     !apActive &&WiFi.status() == WL_CONNECTED ? lv_obj_clear_flag(ui_StandbyScreen_wifiIcon, LV_OBJ_FLAG_HIDDEN)
                                               : lv_obj_add_flag(ui_StandbyScreen_wifiIcon, LV_OBJ_FLAG_HIDDEN);
+
+    if (ui_StandbyScreen_delayLabel != nullptr) {
+        if (tempWakeupConfirmedMs > 0 && millis() - tempWakeupConfirmedMs < 2000) {
+            lv_label_set_text(ui_StandbyScreen_delayLabel, "Timer set!");
+        } else if (tempWakeupDelayMinutes > 0) {
+            lv_label_set_text_fmt(ui_StandbyScreen_delayLabel, "Wake in %d min", tempWakeupDelayMinutes);
+        } else {
+            lv_label_set_text(ui_StandbyScreen_delayLabel, "");
+        }
+    }
+    if (ui_StandbyScreen_downDotLabel != nullptr && ui_StandbyScreen_upDotLabel != nullptr) {
+        if (tempWakeupDelayMinutes > 0) {
+            lv_label_set_text(ui_StandbyScreen_downDotLabel, "-");
+            lv_label_set_text(ui_StandbyScreen_upDotLabel, "+");
+        } else {
+            lv_label_set_text(ui_StandbyScreen_downDotLabel, "");
+            lv_label_set_text(ui_StandbyScreen_upDotLabel, LV_SYMBOL_BULLET);
+        }
+    }
 }
 
 void DefaultUI::updateStatusScreen() const {
