@@ -47,6 +47,9 @@ void onGrindScreenLoad(lv_event_t *e);
 void onGrindToggle(lv_event_t *e);
 void onGrindTimeRaise(lv_event_t *e);
 void onGrindTimeLower(lv_event_t *e);
+void onStandbyScreenLoad(lv_event_t *e);
+void onStandbyDelayRaise(lv_event_t *e);
+void onStandbyDelayLower(lv_event_t *e);
 
 #ifdef __cplusplus
 } /*extern "C"*/

@@ -519,6 +519,22 @@ void Controller::lowerGrindTarget() {
     }
 }
 
+void Controller::raiseTempWakeupDelay() {
+    tempWakeupDelayMinutes = min(tempWakeupDelayMinutes + 5, 120);
+    pluginManager->trigger("standby:wakeupDelay:change", "value", tempWakeupDelayMinutes);
+}
+
+void Controller::lowerTempWakeupDelay() {
+    tempWakeupDelayMinutes = max(tempWakeupDelayMinutes - 5, 0);
+    pluginManager->trigger("standby:wakeupDelay:change", "value", tempWakeupDelayMinutes);
+}
+
+void Controller::activateTempWakeup() {
+    pluginManager->trigger("autowakeup:temp:activate", "minutes", tempWakeupDelayMinutes);
+    pluginManager->trigger("standby:wakeup:confirmed");
+    tempWakeupDelayMinutes = 0;
+}
+
 void Controller::updateControl() {
     // Local capture to avoid race condition with deactivate() running on another core
     Process *proc = currentProcess;

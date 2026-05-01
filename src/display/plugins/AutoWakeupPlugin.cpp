@@ -14,6 +14,13 @@ void AutoWakeupPlugin::setup(Controller *controller, PluginManager *pluginManage
     ESP_LOGI(LOG_TAG.c_str(), "Auto-wakeup plugin initialized");
 
     // Listen for settings changes to log configuration
+    pluginManager->on("autowakeup:temp:activate", [this](const Event &event) {
+        int minutes = event.getInt("minutes");
+        if (minutes > 0) {
+            setTempWakeup(minutes);
+        }
+    });
+
     pluginManager->on("settings:changed", [this](const Event &event) {
         if (settings->isAutoWakeupEnabled()) {
             ESP_LOGI(LOG_TAG.c_str(), "Auto-wakeup enabled with %d schedule(s)", settings->getAutoWakeupSchedules().size());
@@ -24,6 +31,8 @@ void AutoWakeupPlugin::setup(Controller *controller, PluginManager *pluginManage
 }
 
 void AutoWakeupPlugin::loop() {
+    checkTempWakeup();
+
     if (!settings->isAutoWakeupEnabled() || settings->getAutoWakeupSchedules().empty()) {
         return;
     }
@@ -67,6 +76,39 @@ void AutoWakeupPlugin::checkAutoWakeup() {
             pluginManager->trigger("autowakeup:activated", "time", schedule.time);
 
             return; // Only trigger once per minute
+        }
+    }
+}
+
+void AutoWakeupPlugin::setTempWakeup(int minutes) {
+    time_t now;
+    time(&now);
+    tempWakeupAt = now + (minutes * 60);
+    ESP_LOGI(LOG_TAG.c_str(), "Temp wakeup set for %d minutes from now", minutes);
+}
+
+void AutoWakeupPlugin::checkTempWakeup() {
+    if (tempWakeupAt == 0) return;
+    if (controller->getMode() != MODE_STANDBY) {
+        tempWakeupAt = 0;
+        lastBroadcastedMinutes = -1;
+        pluginManager->trigger("standby:wakeupDelay:change", "value", 0);
+        return;
+    }
+    time_t now;
+    time(&now);
+    if (now >= tempWakeupAt) {
+        tempWakeupAt = 0;
+        lastBroadcastedMinutes = -1;
+        pluginManager->trigger("standby:wakeupDelay:change", "value", 0);
+        ESP_LOGI(LOG_TAG.c_str(), "Temp wakeup triggered, switching to brew mode");
+        controller->setMode(MODE_BREW);
+        pluginManager->trigger("autowakeup:activated", "time", String("temp"));
+    } else {
+        int remaining = (int)ceil((double)(tempWakeupAt - now) / 60.0);
+        if (remaining != lastBroadcastedMinutes) {
+            lastBroadcastedMinutes = remaining;
+            pluginManager->trigger("standby:wakeupDelay:change", "value", remaining);
         }
     }
 }

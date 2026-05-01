@@ -121,6 +121,14 @@ void DefaultUI::init() {
         grindVolume = event.getFloat("value");
         rerender = true;
     });
+    pluginManager->on("standby:wakeupDelay:change", [=](Event const &event) {
+        tempWakeupDelayMinutes = event.getInt("value");
+        rerender = true;
+    });
+    pluginManager->on("standby:wakeup:confirmed", [=](Event const &) {
+        tempWakeupConfirmedMs = millis();
+        rerender = true;
+    });
     pluginManager->on("controller:process:end", triggerRender);
     pluginManager->on("controller:process:start", triggerRender);
     pluginManager->on("controller:mode:change", [this](Event const &event) {
@@ -739,6 +747,16 @@ void DefaultUI::updateStandbyScreen() {
                                                      : lv_obj_add_flag(ui_StandbyScreen_bluetoothIcon, LV_OBJ_FLAG_HIDDEN);
     !apActive &&WiFi.status() == WL_CONNECTED ? lv_obj_clear_flag(ui_StandbyScreen_wifiIcon, LV_OBJ_FLAG_HIDDEN)
                                               : lv_obj_add_flag(ui_StandbyScreen_wifiIcon, LV_OBJ_FLAG_HIDDEN);
+
+    if (ui_StandbyScreen_delayLabel != nullptr) {
+        if (tempWakeupConfirmedMs > 0 && millis() - tempWakeupConfirmedMs < 2000) {
+            lv_label_set_text(ui_StandbyScreen_delayLabel, "Timer set!");
+        } else if (tempWakeupDelayMinutes > 0) {
+            lv_label_set_text_fmt(ui_StandbyScreen_delayLabel, "Wake in %d min", tempWakeupDelayMinutes);
+        } else {
+            lv_label_set_text(ui_StandbyScreen_delayLabel, "Tap to wake");
+        }
+    }
 }
 
 void DefaultUI::updateStatusScreen() const {
