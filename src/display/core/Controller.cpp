@@ -520,12 +520,12 @@ void Controller::lowerGrindTarget() {
 }
 
 void Controller::raiseTempWakeupDelay() {
-    tempWakeupDelayMinutes = min(tempWakeupDelayMinutes + 5, 120);
+    tempWakeupDelayMinutes = min(tempWakeupDelayMinutes + 10, 120);
     pluginManager->trigger("standby:wakeupDelay:change", "value", tempWakeupDelayMinutes);
 }
 
 void Controller::lowerTempWakeupDelay() {
-    tempWakeupDelayMinutes = max(tempWakeupDelayMinutes - 5, 0);
+    tempWakeupDelayMinutes = max(tempWakeupDelayMinutes - 10, 0);
     pluginManager->trigger("standby:wakeupDelay:change", "value", tempWakeupDelayMinutes);
 }
 
