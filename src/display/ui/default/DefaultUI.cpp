@@ -754,7 +754,7 @@ void DefaultUI::updateStandbyScreen() {
         } else if (tempWakeupDelayMinutes > 0) {
             lv_label_set_text_fmt(ui_StandbyScreen_delayLabel, "Wake in %d min", tempWakeupDelayMinutes);
         } else {
-            lv_label_set_text(ui_StandbyScreen_delayLabel, "Tap to wake");
+            lv_label_set_text(ui_StandbyScreen_delayLabel, "");
         }
     }
 }
