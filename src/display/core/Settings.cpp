@@ -25,6 +25,7 @@ Settings::Settings() {
     otaChannel = preferences.getString("oc", DEFAULT_OTA_CHANNEL);
     savedScale = preferences.getString("ssc", "");
     momentaryButtons = preferences.getBool("mb", false);
+    bbwRequireScale = preferences.getBool("bbw_rq_sc", true);
     boilerFillActive = preferences.getBool("bf_a", false);
     startupFillTime = preferences.getInt("bf_su", 5000);
     steamFillTime = preferences.getInt("bf_st", 5000);
@@ -285,6 +286,11 @@ void Settings::setMomentaryButtons(bool momentary_buttons) {
     save();
 }
 
+void Settings::setBbwRequireScale(bool require_scale) {
+    bbwRequireScale = require_scale;
+    save();
+}
+
 void Settings::setTimezone(String timezone) {
     this->timezone = std::move(timezone);
     save();
@@ -465,6 +471,7 @@ void Settings::doSave() {
     preferences.putString("sp", selectedProfile);
     preferences.putInt("sbt", standbyTimeout);
     preferences.putBool("mb", momentaryButtons);
+    preferences.putBool("bbw_rq_sc", bbwRequireScale);
     preferences.putString("fp", implode(favoritedProfiles, ","));
     preferences.putString("po", implode(profileOrder, ","));
     preferences.putFloat("spp", steamPumpPercentage);
