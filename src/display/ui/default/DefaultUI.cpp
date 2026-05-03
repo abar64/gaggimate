@@ -757,6 +757,15 @@ void DefaultUI::updateStandbyScreen() {
             lv_label_set_text(ui_StandbyScreen_delayLabel, "");
         }
     }
+    if (ui_StandbyScreen_downDotLabel != nullptr && ui_StandbyScreen_upDotLabel != nullptr) {
+        if (tempWakeupDelayMinutes > 0) {
+            lv_label_set_text(ui_StandbyScreen_downDotLabel, "-");
+            lv_label_set_text(ui_StandbyScreen_upDotLabel, "+");
+        } else {
+            lv_label_set_text(ui_StandbyScreen_downDotLabel, "");
+            lv_label_set_text(ui_StandbyScreen_upDotLabel, LV_SYMBOL_BULLET);
+        }
+    }
 }
 
 void DefaultUI::updateStatusScreen() const {
