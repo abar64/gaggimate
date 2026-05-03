@@ -50,6 +50,13 @@ class DefaultUI {
     void markProfileDirty() { profileDirty = true; }
     void markProfileClean() { profileDirty = false; }
 
+    void setBrewLabel(const char *text) {
+        if (ui_BrewScreen_mainLabel3 == nullptr)
+            return;
+        lv_label_set_text(ui_BrewScreen_mainLabel3, text);
+        lv_refr_now(lv_disp_get_default());
+    }
+
     void applyTheme();
 
     bool isTaskHealthy() const {
