@@ -255,6 +255,30 @@ export function PluginCard({
 
       <div className='bg-base-200 rounded-lg p-4'>
         <div className='flex items-center justify-between'>
+          <span className='text-xl font-medium'>Brew By Weight — Require Scale</span>
+          <input
+            id='bbwRequireScale'
+            name='bbwRequireScale'
+            value='bbwRequireScale'
+            type='checkbox'
+            className='toggle toggle-primary'
+            checked={!!formData.bbwRequireScale}
+            onChange={onChange('bbwRequireScale')}
+            aria-label='Require scale for BBW profiles'
+          />
+        </div>
+        {formData.bbwRequireScale && (
+          <div className='border-base-300 mt-4 border-t pt-4'>
+            <p className='text-sm opacity-70'>
+              When enabled, starting a Brew By Weight profile without a connected Bluetooth scale will
+              abort the brew and show a warning instead of silently falling back to timed mode.
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className='bg-base-200 rounded-lg p-4'>
+        <div className='flex items-center justify-between'>
           <span className='text-xl font-medium'>Home Assistant over MQTT (Deprecated)</span>
           <input
             id='homeAssistant'
