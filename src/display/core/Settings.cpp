@@ -25,7 +25,7 @@ Settings::Settings() {
     otaChannel = preferences.getString("oc", DEFAULT_OTA_CHANNEL);
     savedScale = preferences.getString("ssc", "");
     momentaryButtons = preferences.getBool("mb", false);
-    bbwRequireScale = preferences.getBool("bbw_rq_sc", true);
+    bbwRequireScale = preferences.getBool("bbw_rq_sc", false);
     boilerFillActive = preferences.getBool("bf_a", false);
     startupFillTime = preferences.getInt("bf_su", 5000);
     steamFillTime = preferences.getInt("bf_st", 5000);
