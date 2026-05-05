@@ -22,10 +22,17 @@ class AutoWakeupPlugin : public Plugin {
     String lastCheckedTime = "";
     static const unsigned long AUTO_WAKEUP_CHECK_INTERVAL = 30000; // 1 minute
 
+    time_t tempWakeupAt = 0;
+    int lastBroadcastedMinutes = -1;
+
     void checkAutoWakeup();
+    void checkTempWakeup();
     bool isTimeValid();
     String getCurrentTimeString();
     int getCurrentDayOfWeek();
+
+  public:
+    void setTempWakeup(int minutes);
 };
 
 #endif // AUTO_WAKEUP_PLUGIN_H
