@@ -121,6 +121,9 @@ export function Settings() {
       if (key === 'momentaryButtons') {
         value = !formData.momentaryButtons;
       }
+      if (key === 'bbwRequireScale') {
+        value = !formData.bbwRequireScale;
+      }
       if (key === 'delayAdjust') {
         value = !formData.delayAdjust;
       }
@@ -441,6 +444,7 @@ export function Settings() {
                 />
               </label>
             </div>
+
           </Card>
 
           {/* Web Settings */}

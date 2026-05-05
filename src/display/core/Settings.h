@@ -87,6 +87,7 @@ class Settings {
     int getHomeAssistantPort() const { return homeAssistantPort; }
     String getHomeAssistantTopic() const { return homeAssistantTopic; }
     bool isMomentaryButtons() const { return momentaryButtons; }
+    bool isBbwRequireScale() const { return bbwRequireScale; }
     String getTimezone() const { return timezone; }
     bool isClock24hFormat() const { return clock24hFormat; }
     String getSelectedProfile() const { return selectedProfile; }
@@ -143,6 +144,7 @@ class Settings {
     void setHomeAssistantPort(int homeAssistantPort);
     void setHomeAssistantTopic(const String &homeAssistantTopic);
     void setMomentaryButtons(bool momentary_buttons);
+    void setBbwRequireScale(bool require_scale);
     void setTimezone(String timezone);
     void setClockFormat(bool format_24h);
     void setSelectedProfile(String selected_profile);
@@ -209,6 +211,7 @@ class Settings {
     int homeAssistantPort = 1883;
     String homeAssistantTopic = DEFAULT_HOME_ASSISTANT_TOPIC;
     bool momentaryButtons = false;
+    bool bbwRequireScale = false;
     String timezone = DEFAULT_TIMEZONE;
     bool clock24hFormat = true;
     String otaChannel = DEFAULT_OTA_CHANNEL;
