@@ -211,7 +211,7 @@ class Settings {
     int homeAssistantPort = 1883;
     String homeAssistantTopic = DEFAULT_HOME_ASSISTANT_TOPIC;
     bool momentaryButtons = false;
-    bool bbwRequireScale = true;
+    bool bbwRequireScale = false;
     String timezone = DEFAULT_TIMEZONE;
     bool clock24hFormat = true;
     String otaChannel = DEFAULT_OTA_CHANNEL;
