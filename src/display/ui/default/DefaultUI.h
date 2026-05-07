@@ -62,6 +62,12 @@ class DefaultUI {
         lv_label_set_text(ui_BrewScreen_mainLabel3, "Brew");
         lv_refr_now(lv_disp_get_default());
     }
+    void setBrewLabel(const char *text) {
+        if (ui_BrewScreen_mainLabel3 == nullptr)
+            return;
+        lv_label_set_text(ui_BrewScreen_mainLabel3, text);
+        lv_refr_now(lv_disp_get_default());
+    }
 
     void applyTheme();
 

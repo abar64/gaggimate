@@ -577,6 +577,16 @@ void Controller::activate() {
             pluginManager->trigger("controller:brew:prestart");
         }
     }
+    if (mode == MODE_BREW && settings.isBbwRequireScale() &&
+        profileManager->getSelectedProfile().isVolumetric() && !isVolumetricAvailable()) {
+        ESP_LOGW(LOG_TAG, "BBW profile started without BT scale - aborting brew");
+#ifndef GAGGIMATE_HEADLESS
+        if (ui != nullptr) {
+            ui->setBrewLabel("Connect scale first");
+        }
+#endif
+        return;
+    }
     lastScaleSettleMs = 0;
     lastScaleOffsetAtStart = 0.0f;
     lastScaleSettleTimedOut = false;
