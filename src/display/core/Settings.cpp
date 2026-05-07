@@ -10,9 +10,12 @@ Settings::Settings() {
     targetWaterTemp = preferences.getInt("tw", 80);
     targetGrindVolume = preferences.getDouble("tgv", 18.0);
     targetGrindDuration = preferences.getInt("tgd", 25000);
-    brewDelay = preferences.getDouble("del_br", 800.0);
-    grindDelay = preferences.getDouble("del_gd", 1000.0);
-    delayAdjust = preferences.getBool("del_ad", true);
+    // Migrate legacy float storage (pre-v1.8.1) to double: getDouble returns the sentinel
+    // if the key was stored as a 4-byte float blob, because the blob sizes don't match.
+    double brewDelayVal = preferences.getDouble("del_br", -1.0);
+    brewDelay = (brewDelayVal >= 0.0) ? brewDelayVal : static_cast<double>(preferences.getFloat("del_br", 1000.0f));
+    double grindDelayVal = preferences.getDouble("del_gd", -1.0);
+    grindDelay = (grindDelayVal >= 0.0) ? grindDelayVal : static_cast<double>(preferences.getFloat("del_gd", 1000.0f));    delayAdjust = preferences.getBool("del_ad", true);
     temperatureOffset = preferences.getInt("to", DEFAULT_TEMPERATURE_OFFSET);
     pressureScaling = preferences.getFloat("ps", DEFAULT_PRESSURE_SCALING);
     pid = preferences.getString("pid", DEFAULT_PID);
@@ -415,7 +418,10 @@ void Settings::setFullTankDistance(int full_tank_distance) {
     save();
 }
 
-void Settings::setAltRelayFunction(int alt_relay_function) { altRelayFunction = alt_relay_function; }
+void Settings::setAltRelayFunction(int alt_relay_function) { 
+    altRelayFunction = alt_relay_function; 
+    save();
+}
 
 void Settings::setAutoWakeupEnabled(bool enabled) {
     autowakeupEnabled = enabled;
