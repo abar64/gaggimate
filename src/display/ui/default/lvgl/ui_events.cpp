@@ -65,9 +65,28 @@ void onWakeup(lv_event_t *e) {
         !controller.getClientController()->isConnected()) {
         return;
     }
+    if (controller.getTempWakeupDelayMinutes() > 0) {
+        controller.activateTempWakeup();
+        return;
+    }
     controller.getUI()->changeScreen(&ui_BrewScreen, &ui_BrewScreen_screen_init);
     controller.deactivate();
     controller.setMode(MODE_BREW);
+}
+
+void onStandbyDelayRaise(lv_event_t *e) {
+    lv_event_stop_bubbling(e);
+    controller.raiseTempWakeupDelay();
+}
+
+void onStandbyDelayLower(lv_event_t *e) {
+    lv_event_stop_bubbling(e);
+    controller.lowerTempWakeupDelay();
+}
+
+void onStandbyScreenLoad(lv_event_t *e) {
+    lv_obj_set_ext_click_area(ui_StandbyScreen_upDelayButton, 20);
+    lv_obj_set_ext_click_area(ui_StandbyScreen_downDelayButton, 20);
 }
 
 void onLoadStarted(lv_event_t *e) {}

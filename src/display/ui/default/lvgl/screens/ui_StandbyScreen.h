@@ -23,6 +23,11 @@ extern lv_obj_t *ui_StandbyScreen_bluetoothIcon;
 extern lv_obj_t *ui_StandbyScreen_updateIcon;
 extern lv_obj_t *ui_StandbyScreen_touchIcon;
 extern lv_obj_t *ui_StandbyScreen_mainLabel;
+extern lv_obj_t *ui_StandbyScreen_delayLabel;
+extern lv_obj_t *ui_StandbyScreen_upDelayButton;
+extern lv_obj_t *ui_StandbyScreen_downDelayButton;
+extern lv_obj_t *ui_StandbyScreen_upDotLabel;
+extern lv_obj_t *ui_StandbyScreen_downDotLabel;
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus

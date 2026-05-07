@@ -14,6 +14,11 @@ lv_obj_t *ui_StandbyScreen_bluetoothIcon = NULL;
 lv_obj_t *ui_StandbyScreen_updateIcon = NULL;
 lv_obj_t *ui_StandbyScreen_touchIcon = NULL;
 lv_obj_t *ui_StandbyScreen_mainLabel = NULL;
+lv_obj_t *ui_StandbyScreen_delayLabel = NULL;
+lv_obj_t *ui_StandbyScreen_upDelayButton = NULL;
+lv_obj_t *ui_StandbyScreen_downDelayButton = NULL;
+lv_obj_t *ui_StandbyScreen_upDotLabel = NULL;
+lv_obj_t *ui_StandbyScreen_downDotLabel = NULL;
 // event funtions
 void ui_event_StandbyScreen(lv_event_t *e) {
     lv_event_code_t event_code = lv_event_get_code(e);
@@ -159,6 +164,67 @@ void ui_StandbyScreen_screen_init(void) {
                                            _ui_theme_alpha_NiceWhite);
     lv_obj_set_style_text_font(ui_StandbyScreen_mainLabel, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    // Wakeup delay controls — centred at y+85 (safe on round 480px display, ±221px horizontal clearance)
+    ui_StandbyScreen_delayLabel = lv_label_create(ui_StandbyScreen);
+    lv_obj_set_width(ui_StandbyScreen_delayLabel, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_StandbyScreen_delayLabel, LV_SIZE_CONTENT);
+    lv_obj_set_x(ui_StandbyScreen_delayLabel, 0);
+    lv_obj_set_y(ui_StandbyScreen_delayLabel, 85);
+    lv_obj_set_align(ui_StandbyScreen_delayLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_StandbyScreen_delayLabel, "");
+    ui_object_set_themeable_style_property(ui_StandbyScreen_delayLabel, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_TEXT_COLOR,
+                                           _ui_theme_color_NiceWhite);
+    ui_object_set_themeable_style_property(ui_StandbyScreen_delayLabel, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_TEXT_OPA,
+                                           _ui_theme_alpha_NiceWhite);
+    lv_obj_set_style_text_font(ui_StandbyScreen_delayLabel, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_StandbyScreen_downDelayButton = lv_imgbtn_create(ui_StandbyScreen);
+    lv_obj_set_width(ui_StandbyScreen_downDelayButton, 50);
+    lv_obj_set_height(ui_StandbyScreen_downDelayButton, 50);
+    lv_obj_set_x(ui_StandbyScreen_downDelayButton, -110);
+    lv_obj_set_y(ui_StandbyScreen_downDelayButton, 85);
+    lv_obj_set_align(ui_StandbyScreen_downDelayButton, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_StandbyScreen_downDelayButton, LV_OBJ_FLAG_ADV_HITTEST);
+    lv_obj_clear_flag(ui_StandbyScreen_downDelayButton, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_event_cb(ui_StandbyScreen_downDelayButton, onStandbyDelayLower, LV_EVENT_CLICKED, NULL);
+
+    ui_StandbyScreen_upDelayButton = lv_imgbtn_create(ui_StandbyScreen);
+    lv_obj_set_width(ui_StandbyScreen_upDelayButton, 50);
+    lv_obj_set_height(ui_StandbyScreen_upDelayButton, 50);
+    lv_obj_set_x(ui_StandbyScreen_upDelayButton, 110);
+    lv_obj_set_y(ui_StandbyScreen_upDelayButton, 85);
+    lv_obj_set_align(ui_StandbyScreen_upDelayButton, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_StandbyScreen_upDelayButton, LV_OBJ_FLAG_ADV_HITTEST);
+    lv_obj_clear_flag(ui_StandbyScreen_upDelayButton, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_event_cb(ui_StandbyScreen_upDelayButton, onStandbyDelayRaise, LV_EVENT_CLICKED, NULL);
+
+    ui_StandbyScreen_downDotLabel = lv_label_create(ui_StandbyScreen);
+    lv_obj_set_width(ui_StandbyScreen_downDotLabel, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_StandbyScreen_downDotLabel, LV_SIZE_CONTENT);
+    lv_obj_set_x(ui_StandbyScreen_downDotLabel, -110);
+    lv_obj_set_y(ui_StandbyScreen_downDotLabel, 85);
+    lv_obj_set_align(ui_StandbyScreen_downDotLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_StandbyScreen_downDotLabel, "");
+    lv_obj_add_flag(ui_StandbyScreen_downDotLabel, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_clear_flag(ui_StandbyScreen_downDotLabel, LV_OBJ_FLAG_CLICKABLE);
+    ui_object_set_themeable_style_property(ui_StandbyScreen_downDotLabel, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_TEXT_COLOR, _ui_theme_color_NiceWhite);
+    ui_object_set_themeable_style_property(ui_StandbyScreen_downDotLabel, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_TEXT_OPA, _ui_theme_alpha_NiceWhite);
+    lv_obj_set_style_text_font(ui_StandbyScreen_downDotLabel, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_StandbyScreen_upDotLabel = lv_label_create(ui_StandbyScreen);
+    lv_obj_set_width(ui_StandbyScreen_upDotLabel, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_StandbyScreen_upDotLabel, LV_SIZE_CONTENT);
+    lv_obj_set_x(ui_StandbyScreen_upDotLabel, 110);
+    lv_obj_set_y(ui_StandbyScreen_upDotLabel, 85);
+    lv_obj_set_align(ui_StandbyScreen_upDotLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_StandbyScreen_upDotLabel, LV_SYMBOL_BULLET);
+    lv_obj_add_flag(ui_StandbyScreen_upDotLabel, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_clear_flag(ui_StandbyScreen_upDotLabel, LV_OBJ_FLAG_CLICKABLE);
+    ui_object_set_themeable_style_property(ui_StandbyScreen_upDotLabel, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_TEXT_COLOR, _ui_theme_color_NiceWhite);
+    ui_object_set_themeable_style_property(ui_StandbyScreen_upDotLabel, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_TEXT_OPA, _ui_theme_alpha_NiceWhite);
+    lv_obj_set_style_text_font(ui_StandbyScreen_upDotLabel, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_add_event_cb(ui_StandbyScreen, onStandbyScreenLoad, LV_EVENT_SCREEN_LOADED, NULL);
     lv_obj_add_event_cb(ui_StandbyScreen, ui_event_StandbyScreen, LV_EVENT_ALL, NULL);
 }
 
@@ -176,4 +242,9 @@ void ui_StandbyScreen_screen_destroy(void) {
     ui_StandbyScreen_updateIcon = NULL;
     ui_StandbyScreen_touchIcon = NULL;
     ui_StandbyScreen_mainLabel = NULL;
+    ui_StandbyScreen_delayLabel = NULL;
+    ui_StandbyScreen_upDelayButton = NULL;
+    ui_StandbyScreen_downDelayButton = NULL;
+    ui_StandbyScreen_upDotLabel = NULL;
+    ui_StandbyScreen_downDotLabel = NULL;
 }

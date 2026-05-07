@@ -324,6 +324,12 @@ void WebUIPlugin::handleWebSocketData(AsyncWebSocket *server, AsyncWebSocketClie
                     controller->raiseGrindTarget();
                 } else if (msgType == "req:lower-grind-target") {
                     controller->lowerGrindTarget();
+                } else if (msgType == "req:raise-wakeup-delay") {
+                    controller->raiseTempWakeupDelay();
+                } else if (msgType == "req:lower-wakeup-delay") {
+                    controller->lowerTempWakeupDelay();
+                } else if (msgType == "req:activate-wakeup") {
+                    controller->activateTempWakeup();
                 } else if (msgType == "req:change-mode") {
                     if (doc["mode"].is<uint8_t>()) {
                         auto mode = doc["mode"].as<uint8_t>();
