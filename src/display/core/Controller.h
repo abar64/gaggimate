@@ -94,6 +94,8 @@ class Controller {
     void onVolumetricMeasurement(double measurement, VolumetricMeasurementSource source);
     void setVolumetricOverride(bool override) { volumetricOverride = override; }
     bool isBluetoothScaleHealthy() const;
+    void setBluetoothScaleConnected(bool connected);
+    bool isBluetoothScaleConnected() const { return bluetoothScaleConnected; }
     void onFlush();
 
     uint32_t getLastScaleSettleMs() const { return lastScaleSettleMs; }
@@ -192,6 +194,8 @@ class Controller {
     // Bluetooth scale connection monitoring
     VolumetricMeasurementSource currentVolumetricSource = VolumetricMeasurementSource::INACTIVE;
     unsigned long lastBluetoothMeasurement = 0;
+    bool bluetoothScaleConnected = false;
+    bool awaitingScale = false;
     static const unsigned long BLUETOOTH_GRACE_PERIOD_MS = 1500; // 1.5 second grace period
     static const unsigned long CONTROLLER_WAITING_TIMEOUT_MS = 10000;
 
