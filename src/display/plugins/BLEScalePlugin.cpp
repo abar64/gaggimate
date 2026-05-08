@@ -203,6 +203,10 @@ void BLEScalePlugin::disconnect() {
         uuid = "";
         doConnect = false;
         reconnectionTries = 0;
+
+        if (controller != nullptr) {
+            controller->setBluetoothScaleConnected(false);
+        }
     }
 }
 
@@ -280,6 +284,8 @@ void BLEScalePlugin::establishConnection() {
                 if (scanner != nullptr) {
                     scanner->initializeAsyncScan();
                 }
+            } else {
+                controller->setBluetoothScaleConnected(true);
             }
             break;
         }

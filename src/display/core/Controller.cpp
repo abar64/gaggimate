@@ -567,8 +567,9 @@ void Controller::activate() {
     clear();
     clientController.tare();
     if (mode == MODE_BREW && settings.isBbwRequireScale() &&
-        profileManager->getSelectedProfile().isVolumetric() && !isVolumetricAvailable()) {
+        profileManager->getSelectedProfile().isVolumetric() && !isBluetoothScaleConnected()) {
         ESP_LOGW(LOG_TAG, "BBW profile started without BT scale - aborting brew");
+        awaitingScale = true;
 #ifndef GAGGIMATE_HEADLESS
         if (ui != nullptr) {
             ui->setBrewLabel("Connect scale first");
@@ -733,6 +734,21 @@ void Controller::onVolumetricMeasurement(double measurement, VolumetricMeasureme
 bool Controller::isBluetoothScaleHealthy() const {
     unsigned long timeSinceLastBluetooth = millis() - lastBluetoothMeasurement;
     return (timeSinceLastBluetooth < BLUETOOTH_GRACE_PERIOD_MS) || volumetricOverride;
+}
+
+void Controller::setBluetoothScaleConnected(bool connected) {
+    bluetoothScaleConnected = connected;
+    if (connected && awaitingScale) {
+        awaitingScale = false;
+#ifndef GAGGIMATE_HEADLESS
+        if (ui != nullptr) {
+            ui->setBrewLabel("Brew");
+        }
+#endif
+    }
+    if (!connected) {
+        awaitingScale = false;
+    }
 }
 
 void Controller::onFlush() {
