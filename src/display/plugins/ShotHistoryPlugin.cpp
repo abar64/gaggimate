@@ -296,7 +296,7 @@ unsigned long ShotHistoryPlugin::getTime() {
 }
 
 void ShotHistoryPlugin::endRecording() {
-    if (recording && controller && controller->isVolumetricAvailable() && currentBluetoothWeight > 0) {
+    if (recording && controller && (shotStartedVolumetric || controller->isVolumetricAvailable()) && currentBluetoothWeight > 0) {
         // Start extended recording for any shot with active weight data
         extendedRecording = true;
         extendedRecordingStart = millis();
@@ -350,13 +350,17 @@ uint16_t ShotHistoryPlugin::getSystemInfo() {
         systemInfo |= SYSTEM_INFO_SHOT_STARTED_VOLUMETRIC;
     }
 
-    // Bit 1: Currently in volumetric mode (check current process if active)
+    // Bit 1: Currently in volumetric mode.
+    // Latched for the duration of the shot if shotStartedVolumetric — avoids a transient
+    // isBluetoothScaleHealthy() false (e.g. during triple-tare at brew start) permanently
+    // disabling volumetric for the shot.
     if (controller != nullptr) {
         Process *process = controller->getProcess();
         if (process != nullptr && process->getType() == MODE_BREW) {
             auto *brewProcess = static_cast<BrewProcess *>(process);
             bool currentlyVolumetric = brewProcess->target == ProcessTarget::VOLUMETRIC &&
-                                       brewProcess->currentPhase.hasVolumetricTarget() && controller->isVolumetricAvailable();
+                                       brewProcess->currentPhase.hasVolumetricTarget() &&
+                                       (shotStartedVolumetric || controller->isVolumetricAvailable());
             if (currentlyVolumetric) {
                 systemInfo |= SYSTEM_INFO_CURRENTLY_VOLUMETRIC;
             }
@@ -376,6 +380,11 @@ uint16_t ShotHistoryPlugin::getSystemInfo() {
     // Bit 4: Extended recording active
     if (extendedRecording) {
         systemInfo |= SYSTEM_INFO_EXTENDED_RECORDING;
+    }
+
+    // Bit 5: Scale dropped during a volumetrically-started shot
+    if (shotStartedVolumetric && controller != nullptr && !controller->isBluetoothScaleHealthy()) {
+        systemInfo |= SYSTEM_INFO_SCALE_DROPPED_DURING_SHOT;
     }
 
     return systemInfo;

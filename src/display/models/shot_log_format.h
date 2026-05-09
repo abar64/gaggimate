@@ -112,6 +112,7 @@ static constexpr uint16_t SYSTEM_INFO_CURRENTLY_VOLUMETRIC = 0x0002;      // Cur
 static constexpr uint16_t SYSTEM_INFO_BLUETOOTH_SCALE_CONNECTED = 0x0004; // Bluetooth scale connected
 static constexpr uint16_t SYSTEM_INFO_VOLUMETRIC_AVAILABLE = 0x0008;      // Volumetric available
 static constexpr uint16_t SYSTEM_INFO_EXTENDED_RECORDING = 0x0010;        // Extended recording active
+static constexpr uint16_t SYSTEM_INFO_SCALE_DROPPED_DURING_SHOT = 0x0020; // Scale lost health during a volumetric shot
 
 // Binary shot index format
 // File: /h/index.bin
