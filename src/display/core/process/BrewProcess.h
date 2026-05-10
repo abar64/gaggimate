@@ -94,7 +94,7 @@ class BrewProcess : public Process {
             ESP_LOGI("BrewProcess", "getNewDelayTime: brewEndRate near-zero, returning -1");
             return -1;
         }
-        double overshoot = (currentVolume - brewDelayPhaseStartVolume) - getBrewVolume();
+        double overshoot = currentVolume - getBrewVolume();
         double adjust = overshoot / brewEndRate;
         ESP_LOGI("BrewProcess", "getNewDelayTime: overshoot=%.2f adjust=%.1f", overshoot, adjust);
         if (isnan(adjust) || isinf(adjust)) {
