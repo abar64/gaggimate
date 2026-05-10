@@ -21,6 +21,8 @@ class BrewProcess : public Process {
     unsigned long finished = 0;
     double currentVolume = 0;              // most recent volume pushed (absolute, from BT scale)
     double brewDelayPhaseStartVolume = 0.0; // currentVolume at each phase transition — used only for brewDelay overshoot
+    double brewEndRate = 0.0;   // flow rate (g/ms) captured at the FINISHED transition
+    double brewEndVolume = 0.0; // yield from the last phase (currentVolume - brewDelayPhaseStartVolume) at FINISHED
     float currentFlow = 0.0f;
     float currentPressure = 0.0f;
     float waterPumped = 0.0f;
@@ -85,7 +87,18 @@ class BrewProcess : public Process {
     }
 
     double getNewDelayTime() {
-        double newDelay = brewDelay + volumetricRateCalculator.getOvershootAdjustMillis(getBrewVolume(), currentVolume - brewDelayPhaseStartVolume);
+        if (brewEndRate < 1e-10) {
+            return -1;
+        }
+        // Use the rate captured at pump-off — by isComplete() time the calculator's window
+        // spans the wind-down phase where flow is near zero, making getRate() return ~0.
+        // currentVolume is still updated after FINISHED, so it reflects the final draining weight.
+        double overshoot = (currentVolume - brewDelayPhaseStartVolume) - getBrewVolume();
+        double adjust = overshoot / brewEndRate;
+        if (isnan(adjust) || isinf(adjust)) {
+            return -1;
+        }
+        double newDelay = brewDelay + adjust;
         if (newDelay >= PREDICTIVE_TIME) {
             return -1;
         }
@@ -153,6 +166,8 @@ class BrewProcess : public Process {
                 currentPhaseStarted = millis();
                 computeEffectiveTargetsForCurrentPhase();
             } else {
+                brewEndRate = volumetricRateCalculator.getRate();
+                brewEndVolume = currentVolume - brewDelayPhaseStartVolume;
                 processPhase = ProcessPhase::FINISHED;
                 finished = millis();
             }
