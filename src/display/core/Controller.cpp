@@ -341,8 +341,13 @@ void Controller::loop() {
                     brewProcess->target == ProcessTarget::VOLUMETRIC) {
                     double newDelay = brewProcess->getNewDelayTime();
                     if (newDelay >= 0) {
+                        ESP_LOGI("Controller", "brewDelay update: %.1f -> %.1f ms", settings.getBrewDelay(), newDelay);
                         settings.setBrewDelay(newDelay);
+                    } else {
+                        ESP_LOGI("Controller", "brewDelay not updated: getNewDelayTime returned -1");
                     }
+                } else {
+                    ESP_LOGI("Controller", "brewDelay not updated: process target is not VOLUMETRIC");
                 }
             } else if (lastProcess->getType() == MODE_GRIND) {
                 if (auto *grindProcess = static_cast<GrindProcess *>(lastProcess);

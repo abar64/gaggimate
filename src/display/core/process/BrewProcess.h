@@ -88,21 +88,25 @@ class BrewProcess : public Process {
     }
 
     double getNewDelayTime() {
+        ESP_LOGI("BrewProcess", "getNewDelayTime: brewDelay=%.1f currentVolume=%.2f brewDelayPhaseStartVolume=%.2f brewVolume=%.2f brewEndRate=%.5f",
+                 brewDelay, currentVolume, brewDelayPhaseStartVolume, getBrewVolume(), brewEndRate);
         if (brewEndRate < 1e-10) {
+            ESP_LOGI("BrewProcess", "getNewDelayTime: brewEndRate near-zero, returning -1");
             return -1;
         }
-        // Use the rate captured at pump-off — by isComplete() time the calculator's window
-        // spans the wind-down phase where flow is near zero, making getRate() return ~0.
-        // currentVolume is still updated after FINISHED, so it reflects the final draining weight.
         double overshoot = (currentVolume - brewDelayPhaseStartVolume) - getBrewVolume();
         double adjust = overshoot / brewEndRate;
+        ESP_LOGI("BrewProcess", "getNewDelayTime: overshoot=%.2f adjust=%.1f", overshoot, adjust);
         if (isnan(adjust) || isinf(adjust)) {
+            ESP_LOGI("BrewProcess", "getNewDelayTime: adjust is nan/inf, returning -1");
             return -1;
         }
         double newDelay = brewDelay + adjust;
         if (newDelay >= PREDICTIVE_TIME) {
+            ESP_LOGI("BrewProcess", "getNewDelayTime: newDelay=%.1f >= PREDICTIVE_TIME, returning -1", newDelay);
             return -1;
         }
+        ESP_LOGI("BrewProcess", "getNewDelayTime: returning newDelay=%.1f", newDelay);
         return newDelay;
     }
 
