@@ -359,7 +359,6 @@ uint16_t ShotHistoryPlugin::getSystemInfo() {
         if (process != nullptr && process->getType() == MODE_BREW) {
             auto *brewProcess = static_cast<BrewProcess *>(process);
             bool currentlyVolumetric = brewProcess->target == ProcessTarget::VOLUMETRIC &&
-                                       brewProcess->currentPhase.hasVolumetricTarget() &&
                                        (shotStartedVolumetric || controller->isVolumetricAvailable());
             if (currentlyVolumetric) {
                 systemInfo |= SYSTEM_INFO_CURRENTLY_VOLUMETRIC;
