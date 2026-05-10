@@ -785,6 +785,14 @@ void Controller::onVolumetricMeasurement(double measurement, VolumetricMeasureme
                            "value", static_cast<float>(measurement));
     if (source == VolumetricMeasurementSource::BLUETOOTH) {
         lastBluetoothMeasurement = millis();
+        // Feed the BT-scale-specific rate tracker unconditionally so brewEndRate is always
+        // based on BT scale weight, even when currentVolumetricSource is FLOW_ESTIMATION.
+        if (currentProcess != nullptr) {
+            currentProcess->updateBTVolume(measurement);
+        }
+        if (lastProcess != nullptr && !lastProcess->isComplete()) {
+            lastProcess->updateBTVolume(measurement);
+        }
     }
 
     if (currentVolumetricSource != source) {

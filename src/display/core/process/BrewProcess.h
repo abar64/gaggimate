@@ -27,6 +27,7 @@ class BrewProcess : public Process {
     float currentPressure = 0.0f;
     float waterPumped = 0.0f;
     VolumetricRateCalculator volumetricRateCalculator{PREDICTIVE_TIME};
+    VolumetricRateCalculator btScaleRateCalculator{PREDICTIVE_TIME};
 
     explicit BrewProcess(Profile profile, ProcessTarget target, double brewDelay = 0.0)
         : profile(profile), target(target), brewDelay(brewDelay) {
@@ -42,6 +43,12 @@ class BrewProcess : public Process {
         currentVolume = volume;
         if (processPhase != ProcessPhase::FINISHED) { // only store measurements while active
             volumetricRateCalculator.addMeasurement(volume);
+        }
+    }
+
+    void updateBTVolume(double volume) override {
+        if (processPhase != ProcessPhase::FINISHED) {
+            btScaleRateCalculator.addMeasurement(volume);
         }
     }
 
@@ -64,7 +71,7 @@ class BrewProcess : public Process {
         double volume = currentVolume - baseVolume;
         if (volume > 0.0) {
             double currentRate = volumetricRateCalculator.getRate();
-            brewEndRate = currentRate; // latch on every predictive check; final call captures brew-end rate
+            brewEndRate = btScaleRateCalculator.getRate(); // BT scale rate, independent of currentVolumetricSource
             double predictedAddedVolume = currentRate * brewDelay;
             predictedAddedVolume = std::clamp(predictedAddedVolume, 0.0, 8.0);
             volume = (currentVolume - baseVolume) + predictedAddedVolume;

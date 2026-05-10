@@ -24,6 +24,11 @@ class Process {
     virtual int getType() = 0;
 
     virtual void updateVolume(double volume) = 0;
+
+    // Called unconditionally for every BT scale measurement, regardless of currentVolumetricSource,
+    // so that processes can maintain a BT-scale-specific rate tracker even when the active
+    // volumetric source is FLOW_ESTIMATION.
+    virtual void updateBTVolume(double volume) {}
 };
 
 enum class ProcessTarget { VOLUMETRIC, TIME };
