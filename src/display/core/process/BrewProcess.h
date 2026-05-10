@@ -64,6 +64,7 @@ class BrewProcess : public Process {
         double volume = currentVolume - baseVolume;
         if (volume > 0.0) {
             double currentRate = volumetricRateCalculator.getRate();
+            brewEndRate = currentRate; // latch on every predictive check; final call captures brew-end rate
             double predictedAddedVolume = currentRate * brewDelay;
             predictedAddedVolume = std::clamp(predictedAddedVolume, 0.0, 8.0);
             volume = (currentVolume - baseVolume) + predictedAddedVolume;
@@ -166,7 +167,6 @@ class BrewProcess : public Process {
                 currentPhaseStarted = millis();
                 computeEffectiveTargetsForCurrentPhase();
             } else {
-                brewEndRate = volumetricRateCalculator.getRate();
                 brewEndVolume = currentVolume - brewDelayPhaseStartVolume;
                 processPhase = ProcessPhase::FINISHED;
                 finished = millis();
