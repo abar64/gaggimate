@@ -49,6 +49,7 @@ class BrewProcess : public Process {
     void updateBTVolume(double volume) override {
         if (processPhase != ProcessPhase::FINISHED) {
             btScaleRateCalculator.addMeasurement(volume);
+            brewEndRate = btScaleRateCalculator.getRate();
         }
     }
 
@@ -71,7 +72,6 @@ class BrewProcess : public Process {
         double volume = currentVolume - baseVolume;
         if (volume > 0.0) {
             double currentRate = volumetricRateCalculator.getRate();
-            brewEndRate = btScaleRateCalculator.getRate(); // BT scale rate, independent of currentVolumetricSource
             double predictedAddedVolume = currentRate * brewDelay;
             predictedAddedVolume = std::clamp(predictedAddedVolume, 0.0, 8.0);
             volume = (currentVolume - baseVolume) + predictedAddedVolume;
