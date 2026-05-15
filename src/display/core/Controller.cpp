@@ -812,6 +812,22 @@ bool Controller::isBluetoothScaleHealthy() const {
     return (timeSinceLastBluetooth < BLUETOOTH_GRACE_PERIOD_MS) || volumetricOverride;
 }
 
+
+void Controller::setBluetoothScaleConnected(bool connected) {
+    bluetoothScaleConnected = connected;
+    if (connected && awaitingScale) {
+        awaitingScale = false;
+#ifndef GAGGIMATE_HEADLESS
+        if (ui != nullptr) {
+            ui->queueBrewLabelClear();
+        }
+#endif
+    }
+    if (!connected) {
+        awaitingScale = false;
+    }
+}
+
 void Controller::onFlush() {
     if (isActive()) {
         return;
