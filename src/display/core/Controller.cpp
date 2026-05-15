@@ -619,6 +619,7 @@ void Controller::activate() {
             ui->setBrewLabel("Connect scale first");
         }
 #endif
+        awaitingScale = true;
         return;
     }
     lastScaleSettleMs = 0;
