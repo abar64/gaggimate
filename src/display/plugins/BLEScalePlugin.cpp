@@ -274,6 +274,9 @@ void BLEScalePlugin::establishConnection() {
                 // Safe to call directly from task context with null check
                 if (&BLEScales != nullptr) {
                     BLEScales.onMeasurement(weight);
+                    if (!BLEScales.controller->isBluetoothScaleConnected()) {
+                        BLEScales.controller->setBluetoothScaleConnected(true);
+                    }
                 }
             });
 
@@ -284,8 +287,6 @@ void BLEScalePlugin::establishConnection() {
                 if (scanner != nullptr) {
                     scanner->initializeAsyncScan();
                 }
-            } else {
-                controller->setBluetoothScaleConnected(true);
             }
             break;
         }

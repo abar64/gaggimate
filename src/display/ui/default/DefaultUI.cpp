@@ -264,6 +264,10 @@ void DefaultUI::loop() {
             updateStandbyScreen();
         if (lv_scr_act() == ui_StatusScreen)
             updateStatusScreen();
+        if (pendingBrewLabelClear) {
+            pendingBrewLabelClear = false;
+            setBrewLabel("");
+        }
         effect_mgr.evaluate_all();
     }
 

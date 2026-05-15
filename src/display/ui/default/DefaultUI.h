@@ -47,6 +47,7 @@ class DefaultUI {
     void onVolumetricDelete();
 
     void markDirty() { rerender = true; }
+    void queueBrewLabelClear() { pendingBrewLabelClear = true; rerender = true; }
     void markProfileDirty() { profileDirty = true; }
     void markProfileClean() { profileDirty = false; }
 
@@ -118,6 +119,7 @@ class DefaultUI {
     int christmasMode = false;
 
     bool rerender = false;
+    bool pendingBrewLabelClear = false;
     unsigned long lastRender = 0;
 
     int mode = MODE_STANDBY;

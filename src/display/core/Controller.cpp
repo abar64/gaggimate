@@ -575,6 +575,7 @@ void Controller::activate() {
             ui->setBrewLabel("Connect scale first");
         }
 #endif
+        awaitingScale = true;
         return;
     }
     if (isVolumetricAvailable()) {
@@ -742,7 +743,7 @@ void Controller::setBluetoothScaleConnected(bool connected) {
         awaitingScale = false;
 #ifndef GAGGIMATE_HEADLESS
         if (ui != nullptr) {
-            ui->setBrewLabel("Brew");
+            ui->queueBrewLabelClear();
         }
 #endif
     }
