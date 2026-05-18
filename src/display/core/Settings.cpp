@@ -52,6 +52,8 @@ Settings::Settings() {
     steamPumpCutoff = preferences.getFloat("spc", DEFAULT_STEAM_PUMP_CUTOFF);
     historyIndex = preferences.getInt("hi", 0);
     autowakeupEnabled = preferences.getBool("ab_en", false);
+    lastShutdownTemp = preferences.getFloat("tm_sdt", 20.0f);
+    lastShutdownTime = preferences.getUInt("tm_sdts", 0);
 
     // Load schedule format: "time1|days1;time2|days2" where days is 7-bit string (e.g., "1111100" for weekdays only)
     String schedulesStr = preferences.getString("ab_schedules", "");
@@ -431,6 +433,12 @@ void Settings::setAutoWakeupEnabled(bool enabled) {
 void Settings::setAutoWakeupSchedules(const std::vector<AutoWakeupSchedule> &schedules) {
     autowakeupSchedules = schedules;
     save();
+}
+
+void Settings::setShutdownThermalState(float temp, uint32_t timestamp) {
+    lastShutdownTemp = temp;
+    lastShutdownTime = timestamp;
+    save(true);
 }
 
 void Settings::doSave() {

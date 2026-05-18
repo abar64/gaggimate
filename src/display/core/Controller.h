@@ -5,6 +5,7 @@
 #include "NimBLEComm.h"
 #include "PluginManager.h"
 #include "Settings.h"
+#include <display/models/ThermalModel.h>
 #include <WiFi.h>
 #include <display/core/ProfileManager.h>
 #include <display/core/process/Process.h>
@@ -115,6 +116,7 @@ class Controller {
     SystemInfo getSystemInfo() const { return systemInfo; }
 
     NimBLEClientController *getClientController() { return &clientController; }
+    ThermalModel &getThermalModel() { return thermalModel; }
 
   private:
     // Initialization methods
@@ -157,6 +159,8 @@ class Controller {
     float currentPumpFlow = 0.0f;
     float targetFlow = 0.0f;
     int tofDistance = 0;
+
+    ThermalModel thermalModel;
 
     SystemInfo systemInfo{};
 

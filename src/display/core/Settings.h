@@ -111,6 +111,10 @@ class Settings {
     int getAltRelayFunction() const { return altRelayFunction; }
     bool isAutoWakeupEnabled() const { return autowakeupEnabled; }
     std::vector<AutoWakeupSchedule> getAutoWakeupSchedules() const { return autowakeupSchedules; }
+    float getLastShutdownTemp() const { return lastShutdownTemp; }
+    uint32_t getLastShutdownTime() const { return lastShutdownTime; }
+    // Writes immediately (noDelay) so thermal state survives a rapid power cycle.
+    void setShutdownThermalState(float temp, uint32_t timestamp);
     void setTargetSteamTemp(int target_steam_temp);
     void setTargetWaterTemp(int target_water_temp);
     void setTemperatureOffset(int temperature_offset);
@@ -237,6 +241,9 @@ class Settings {
     int emptyTankDistance = 200;
     int fullTankDistance = 50;
     int altRelayFunction = ALT_RELAY_GRIND; // Default to grind
+    
+    float    lastShutdownTemp = 20.0f;
+    uint32_t lastShutdownTime = 0;
 
     void doSave();
     xTaskHandle taskHandle;

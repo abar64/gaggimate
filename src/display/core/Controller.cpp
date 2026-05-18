@@ -285,6 +285,7 @@ void Controller::loop() {
         clientController.sendPumpModelCoeffs(settings.getPumpModelCoeffs());
         if (!loaded) {
             loaded = true;
+            thermalModel.begin(settings.getLastShutdownTemp(), settings.getLastShutdownTime());
             if (settings.getStartupMode() == MODE_STANDBY)
                 activateStandby();
 
@@ -558,7 +559,8 @@ void Controller::updateControl() {
     bool active = isActive();
 
     float targetTemp = getTargetTemp();
-    if (targetTemp > .0f) {
+    if (targetTemp > 0.0f) {
+        thermalModel.setTarget(targetTemp);
         targetTemp = targetTemp + static_cast<float>(settings.getTemperatureOffset());
     }
 
@@ -725,6 +727,9 @@ void Controller::deactivateGrind() {
 }
 
 void Controller::activateStandby() {
+    float rawBoilerTemp = currentTemp + static_cast<float>(settings.getTemperatureOffset());
+    settings.setShutdownThermalState(rawBoilerTemp, static_cast<uint32_t>(time(nullptr)));
+    thermalModel.notifyStandby();
     setMode(MODE_STANDBY);
     deactivate();
 }
@@ -756,6 +761,8 @@ void Controller::setMode(int newMode) {
 }
 
 void Controller::onTempRead(float temperature) {
+    thermalModel.update(temperature);
+    
     float temp = temperature - static_cast<float>(settings.getTemperatureOffset());
     Event event = pluginManager->trigger("boiler:currentTemperature:change", "value", temp);
     currentTemp = event.getFloat("value");
