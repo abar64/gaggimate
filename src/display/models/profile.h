@@ -130,6 +130,7 @@ struct Profile {
     String description;
     bool utility = false;
     float temperature;
+    double brewDelay = 0.0; // ms override; 0 = use global NVS setting
     bool favorite = false;
     bool selected = false;
     std::vector<Phase> phases;
@@ -217,6 +218,7 @@ inline bool parseProfile(const JsonObject &obj, Profile &profile) {
     profile.type = obj["type"].as<String>();
     profile.description = obj["description"].as<String>();
     profile.temperature = obj["temperature"].as<float>();
+    profile.brewDelay = obj["brewDelay"] | 0.0;
     profile.favorite = obj["favorite"] | false;
     profile.selected = obj["selected"] | false;
     profile.utility = obj["utility"] | false;
@@ -309,6 +311,8 @@ inline void writeProfile(JsonObject &obj, const Profile &profile) {
     obj["type"] = profile.type;
     obj["description"] = profile.description;
     obj["temperature"] = profile.temperature;
+    if (profile.brewDelay > 0.0)
+        obj["brewDelay"] = profile.brewDelay;
     obj["favorite"] = profile.favorite;
     obj["selected"] = profile.selected;
     obj["utility"] = profile.utility;

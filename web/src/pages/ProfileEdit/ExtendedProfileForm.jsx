@@ -10,7 +10,7 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus';
 import { faTrashCan } from '@fortawesome/free-solid-svg-icons/faTrashCan';
 
 export function ExtendedProfileForm(props) {
-  const { data, onChange, onSave, saving = true, pressureAvailable = false } = props;
+  const { data, onChange, onSave, saving = true, pressureAvailable = false, globalBrewDelay = null } = props;
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
 
   const onFieldChange = (field, value) => {
@@ -124,6 +124,33 @@ export function ExtendedProfileForm(props) {
                 <span aria-label='degrees Celsius'>°C</span>
               </label>
             </div>
+          </div>
+          <div className='form-control'>
+            <label htmlFor='brewDelay' className='mb-2 block text-sm font-medium'>
+              Brew Delay Override
+            </label>
+            <div className='input-group'>
+              <label htmlFor='brewDelay' className='input w-full'>
+                <input
+                  id='brewDelay'
+                  name='brewDelay'
+                  type='number'
+                  className='grow'
+                  min='0'
+                  max='4000'
+                  step='10'
+                  value={data?.brewDelay ?? 0}
+                  onChange={e => onFieldChange('brewDelay', parseFloat(e.target.value) || 0)}
+                  aria-label='Brew delay override in milliseconds'
+                />
+                <span aria-label='milliseconds'>ms</span>
+              </label>
+            </div>
+            <p className='mt-1 text-xs text-base-content/50'>
+              {globalBrewDelay !== null
+                ? `0 = use machine default (${globalBrewDelay} ms)`
+                : '0 = use machine default'}
+            </p>
           </div>
         </Card>
         <Card sm={10}>

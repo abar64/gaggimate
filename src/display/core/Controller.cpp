@@ -342,8 +342,13 @@ void Controller::loop() {
                     brewProcess->target == ProcessTarget::VOLUMETRIC) {
                     double newDelay = brewProcess->getNewDelayTime();
                     if (newDelay >= 0) {
-                        ESP_LOGI("Controller", "brewDelay update: %.1f -> %.1f ms", settings.getBrewDelay(), newDelay);
-                        settings.setBrewDelay(newDelay);
+                        const double profileOverride = profileManager->getSelectedProfile().brewDelay;
+                        if (profileOverride <= 0.0) {
+                            ESP_LOGI("Controller", "brewDelay update: %.1f -> %.1f ms", settings.getBrewDelay(), newDelay);
+                            settings.setBrewDelay(newDelay);
+                        } else {
+                            ESP_LOGI("Controller", "brewDelay not updated: profile override active (%.1f ms)", profileOverride);
+                        }
                     } else {
                         ESP_LOGI("Controller", "brewDelay not updated: getNewDelayTime returned -1");
                     }
@@ -661,13 +666,17 @@ void Controller::activate() {
     }
     switch (mode) {
     case MODE_BREW:
+    {
+        double profileBrewDelay = profileManager->getSelectedProfile().brewDelay;
+        double effectiveBrewDelay = (profileBrewDelay > 0.0) ? profileBrewDelay : settings.getBrewDelay();
         startProcess(new BrewProcess(profileManager->getSelectedProfile(),
                                      profileManager->getSelectedProfile().isVolumetric() && isVolumetricAvailable() &&
                                              !lastScaleSettleTimedOut
                                          ? ProcessTarget::VOLUMETRIC
                                          : ProcessTarget::TIME,
-                                     settings.getBrewDelay()));
+                                     effectiveBrewDelay));
         break;
+    }
     case MODE_STEAM:
         startProcess(new SteamProcess(STEAM_SAFETY_DURATION_MS, settings.getSteamPumpPercentage()));
         break;

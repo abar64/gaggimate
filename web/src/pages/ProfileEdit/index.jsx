@@ -19,6 +19,13 @@ export function ProfileEdit() {
   const [saving, setSaving] = useState(false);
   const { params } = useRoute();
   const [data, setData] = useState(null);
+  const [globalBrewDelay, setGlobalBrewDelay] = useState(null);
+  useEffect(() => {
+    fetch('/api/settings')
+      .then(r => r.json())
+      .then(s => setGlobalBrewDelay(s.brewDelay ?? null))
+      .catch(() => {});
+  }, []);
   useEffect(() => {
     async function fetchData() {
       if (params.id === 'new') {
@@ -133,6 +140,7 @@ export function ProfileEdit() {
           onSave={onSave}
           saving={saving}
           pressureAvailable={pressureAvailable.value}
+          globalBrewDelay={globalBrewDelay}
         />
       )}
       {data?.type === 'pro' && (
@@ -142,6 +150,7 @@ export function ProfileEdit() {
           onSave={onSave}
           saving={saving}
           pressureAvailable={pressureAvailable.value}
+          globalBrewDelay={globalBrewDelay}
         />
       )}
     </>
