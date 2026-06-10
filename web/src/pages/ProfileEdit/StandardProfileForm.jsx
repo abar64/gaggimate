@@ -6,9 +6,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus';
 import { faTrashCan } from '@fortawesome/free-solid-svg-icons/faTrashCan';
 import { Tooltip } from '../../components/Tooltip.jsx';
+import { useState } from 'preact/hooks';
 
 export function StandardProfileForm(props) {
   const { data, onChange, onSave, saving = true, pressureAvailable = false, globalBrewDelay = null } = props;
+  const [brewDelayInput, setBrewDelayInput] = useState(String(data?.brewDelay ?? 0));
 
   const onFieldChange = (field, value) => {
     onChange({
@@ -122,13 +124,16 @@ export function StandardProfileForm(props) {
                 <input
                   id='brewDelay'
                   name='brewDelay'
-                  type='number'
-                  className='grow'
-                  min='0'
-                  max='4000'
-                  step='10'
-                  value={data?.brewDelay ?? 0}
-                  onChange={e => onFieldChange('brewDelay', parseFloat(e.target.value) || 0)}
+                  type='text'
+                  inputMode='decimal'
+                  value={brewDelayInput}
+                  onChange={e => {
+                    setBrewDelayInput(e.target.value);
+                    const parsed = parseFloat(e.target.value);
+                    if (!isNaN(parsed)) {
+                      onFieldChange('brewDelay', parsed);
+                    }
+                  }}
                   aria-label='Brew delay override in milliseconds'
                 />
                 <span aria-label='milliseconds'>ms</span>
