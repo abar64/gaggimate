@@ -342,12 +342,14 @@ void Controller::loop() {
                     brewProcess->target == ProcessTarget::VOLUMETRIC) {
                     double newDelay = brewProcess->getNewDelayTime();
                     if (newDelay >= 0) {
-                        const double profileOverride = profileManager->getSelectedProfile().brewDelay;
-                        if (profileOverride <= 0.0) {
-                            ESP_LOGI("Controller", "brewDelay update: %.1f -> %.1f ms", settings.getBrewDelay(), newDelay);
-                            settings.setBrewDelay(newDelay);
+                        Profile &profile = profileManager->getSelectedProfile();
+                        if (profile.brewDelay > 0.0) {
+                            ESP_LOGI("Controller", "brewDelay update (profile): %.1f -> %.1f ms", profile.brewDelay, newDelay);
+                            profile.brewDelay = newDelay;
+                            profileManager->saveProfile(profile);
                         } else {
-                            ESP_LOGI("Controller", "brewDelay not updated: profile override active (%.1f ms)", profileOverride);
+                            ESP_LOGI("Controller", "brewDelay update (global): %.1f -> %.1f ms", settings.getBrewDelay(), newDelay);
+                            settings.setBrewDelay(newDelay);
                         }
                     } else {
                         ESP_LOGI("Controller", "brewDelay not updated: getNewDelayTime returned -1");
