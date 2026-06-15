@@ -525,7 +525,7 @@ void Controller::raiseTempWakeupDelay() {
 }
 
 void Controller::lowerTempWakeupDelay() {
-    tempWakeupDelayMinutes = max(tempWakeupDelayMinutes - 10, 0);
+    tempWakeupDelayMinutes = max(tempWakeupDelayMinutes - 5, 0);
     pluginManager->trigger("standby:wakeupDelay:change", "value", tempWakeupDelayMinutes);
 }
 
